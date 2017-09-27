@@ -5,7 +5,7 @@
 
 # Below is an example in 1-D illustrating the problem we encounter in voxelwise analysis of PET data in standardized space.
 
-# In[254]:
+# In[1]:
 
 import numpy as np
 import scipy as sp
@@ -15,7 +15,7 @@ from IPython.core.pylabtools import figsize
 get_ipython().magic('matplotlib inline')
 
 
-# In[255]:
+# In[2]:
 
 def rect(x):
     return (np.abs(x)<=0.5).astype(float)
@@ -23,7 +23,7 @@ def rect(x):
 
 # First, we generate sample 1-D "images" for three subjects. In the "true intensity" images, a value of 0 represents ventricles and 1 represents surrounding white matter.
 
-# In[276]:
+# In[3]:
 
 xrange = np.linspace(-5,5,5000)
 
@@ -34,7 +34,7 @@ subj2_anatomy = 1 - rect(xrange/2)
 subj3_anatomy = 1 - rect(xrange)
 
 
-# In[277]:
+# In[4]:
 
 figsize(18,4)
 plt.subplot(1,3,1)
@@ -59,7 +59,7 @@ plt.xlabel('$x$ position');
 # 
 # Now we take a look at the point spread function (PSF) of the PET scanner:
 
-# In[278]:
+# In[5]:
 
 psf = np.sinc(xrange)
 psf[np.abs(xrange)>1] = 0
@@ -71,7 +71,7 @@ plt.title('PET scanner PSF');
 
 # When we image using this scanner, the true anatomy will be blurred:
 
-# In[279]:
+# In[6]:
 
 subj1_pet = np.convolve(subj1_anatomy, psf, 'same')
 subj2_pet = np.convolve(subj2_anatomy, psf, 'same')
@@ -84,7 +84,7 @@ subj3_pet = subj3_pet / subj3_pet.max()
 
 # Below, the dashed lines indicate true anatomy, and the solid lines indicate the blurred anatomy as observed in the PET scan.
 
-# In[280]:
+# In[7]:
 
 figsize(18,4)
 plt.subplot(1,3,1)
@@ -110,7 +110,7 @@ plt.xlabel('$x$ position');
 
 # Now, we want to align the anatomies of each of these individuals onto our template.
 
-# In[281]:
+# In[8]:
 
 figsize(6,4)
 plt.plot(xrange, template_anatomy, 'k')
@@ -124,8 +124,9 @@ plt.ylabel('True intensity');
 # 
 # First, we consider the scenario where we only allow global scaling in the transformation between template space and subject space.
 
-# In[282]:
+# In[16]:
 
+from scipy.interpolate import NearestNDInterpolator
 # transformation taking a point in template space and mapping into subject1 space
 def T1(x):
     return x/2
@@ -155,7 +156,7 @@ plt.title('After registration to template');
 plt.ylabel('Blurred intensity');
 
 
-# As seen in the plot above to the right, after we bring the PET images into template space, the subject with smallest ventricles (subject 1, blue) has an intensity much higher than 0 inside the ventricles. Larger ventricles attain lower signal. This is a problem because in voxelwise analyses, we might find (falsely, that is) that older individuals (larger ventricles) have higher signal in the ventricles.
+# As seen in the plot above to the right, after we bring the PET images into template space, the subject with smallest ventricles (subject 1, blue) has an intensity much higher than 0 inside the ventricles. Larger ventricles attain lower signal. This is a problem because in voxelwise analyses, we might find (falsely, that is) that older individuals (larger ventricles) have lower activity in the ventricles.
 # 
 # Now we consider a nonlinear mapping between template space and subject space:
 
